@@ -1,0 +1,13 @@
+# Scraped content from bikepacking.com — kept local only, not published,
+# per their Terms of Use (no crawl/scrape/harvest of site content).
+bikepacking-101/
+rag/chunks.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# macOS
+.DS_Store
