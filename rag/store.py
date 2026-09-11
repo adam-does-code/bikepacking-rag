@@ -10,16 +10,18 @@ so we swap in pysqlite3 (built against a newer libsqlite3 via Homebrew)
 before chromadb is imported. See README for the environment-specific setup.
 """
 
+import json
 import sys
+from pathlib import Path
 
 import pysqlite3
 
+# Chroma requires sqlite3 >=3.35.0; this swaps in pysqlite3 (built against a
+# newer libsqlite3) before chromadb is imported. See README for the
+# environment-specific setup this depends on.
 sys.modules["sqlite3"] = pysqlite3
 
-import json
-from pathlib import Path
-
-import chromadb
+import chromadb  # pylint: disable=wrong-import-position
 
 EMBEDDINGS_PATH = Path(__file__).parent / "embeddings.json"
 DB_DIR = Path(__file__).parent / "chroma_db"
@@ -33,9 +35,9 @@ def main():
     client = chromadb.PersistentClient(path=str(DB_DIR))
     # Delete any existing collection so re-running this script is idempotent
     # rather than appending duplicates on top of a previous run.
-    client.delete_collection(COLLECTION_NAME) if COLLECTION_NAME in [
-        c.name for c in client.list_collections()
-    ] else None
+    existing = [c.name for c in client.list_collections()]
+    if COLLECTION_NAME in existing:
+        client.delete_collection(COLLECTION_NAME)
     collection = client.create_collection(COLLECTION_NAME)
 
     collection.add(

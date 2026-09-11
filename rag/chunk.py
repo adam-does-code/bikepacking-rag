@@ -97,7 +97,6 @@ def chunk_file(md_path: Path):
 
 def main():
     all_chunks = []
-    chunk_id = 0
     for md_path in sorted(SRC_DIR.glob("*.md")):
         file_chunks = chunk_file(md_path)
         for i, chunk in enumerate(file_chunks):
