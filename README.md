@@ -23,7 +23,11 @@ answering questions over the [BIKEPACKING.com Bikepacking 101 Handbook](https://
    chunks in a local [Chroma](https://www.trychroma.com/) database
    (`rag/chroma_db/`), so similarity search is a library call instead of a
    hand-written loop over a JSON file. Free, no server, no account.
-5. **Query + retrieval** — TODO
+5. **Query + retrieval** ([`rag/query.py`](rag/query.py)) — embeds a question,
+   retrieves the top-5 most similar chunks from Chroma, and asks Gemini
+   (`gemini-3.6-flash`, free tier) to answer using only that context. Sources
+   are built deterministically from chunk metadata, not left to the model, so
+   citations can't be hallucinated.
 
 ## Content note
 
@@ -57,9 +61,14 @@ CPPFLAGS="-I$sqlite_prefix/include" LDFLAGS="-L$sqlite_prefix/lib" \
 `rag/store.py` swaps in `pysqlite3` in place of the stdlib `sqlite3` before
 importing `chromadb`, so no further code changes are needed once it builds.
 
+`rag/query.py` calls the free-tier Gemini API for the final answer, so it
+needs an API key: get one at [aistudio.google.com/apikey](https://aistudio.google.com/apikey),
+copy `.env.example` to `.env`, and fill in `GEMINI_API_KEY`.
+
 ```bash
 poetry install
 poetry run python rag/chunk.py
 poetry run python rag/embed.py
 poetry run python rag/store.py
+poetry run python rag/query.py "what tires should I use for the Great Divide route?"
 ```
