@@ -13,32 +13,53 @@ answering questions over the [BIKEPACKING.com Bikepacking 101 Handbook](https://
    chunk stays semantically whole and carries a clean heading path (e.g.
    `Bikepacking Bags and How to Pack > Handlebar Bags > Handlebar Cradles`) usable
    as a citation. Oversized sections are further split on paragraph breaks.
+   See [`docs/chunking.md`](docs/chunking.md) for how this compares to
+   LangChain's and NLTK's chunking tools.
 3. **Embedding** ([`rag/embed.py`](rag/embed.py)) — converts each chunk's text into
    a 384-dimension vector with a local `sentence-transformers` model
    (`all-MiniLM-L6-v2`) — no API key, no network calls after the model weights are
    cached. Vectors are L2-normalized so cosine similarity reduces to a dot product.
-4. **Vector storage** — TODO
+4. **Vector storage** ([`rag/store.py`](rag/store.py)) — indexes the embedded
+   chunks in a local [Chroma](https://www.trychroma.com/) database
+   (`rag/chroma_db/`), so similarity search is a library call instead of a
+   hand-written loop over a JSON file. Free, no server, no account.
 5. **Query + retrieval** — TODO
 
 ## Content note
 
 The scraped handbook text (`bikepacking-101/*.md`, `rag/chunks.json`,
-`rag/embeddings.json`) is intentionally excluded from this repo (see
-`.gitignore`). BIKEPACKING.com's [Terms of Use](https://bikepacking.com/about/privacy/)
-prohibit crawling, harvesting, or scraping site content, so this repo publishes
-only the original pipeline code, not the underlying content it was built and
-tested against.
+`rag/embeddings.json`, `rag/chroma_db/`) is intentionally excluded from this
+repo (see `.gitignore`). BIKEPACKING.com's
+[Terms of Use](https://bikepacking.com/about/privacy/) prohibit crawling,
+harvesting, or scraping site content, so this repo publishes only the
+original pipeline code, not the underlying content it was built and tested
+against.
 
 ## Setup
 
 Requires Python >=3.9,<3.10 with this project's pinned dependency versions —
-`torch<2.3` and `sentence-transformers<3.0` are capped for compatibility with
-older Python/macOS combinations; `numpy<2` is capped to match the ABI `torch`
-was compiled against. Adjust these caps if your environment supports newer
-versions.
+`torch<2.3`, `sentence-transformers<3.0`, and `onnxruntime<1.19` are capped
+for compatibility with older Python/macOS combinations; `numpy<2` is capped
+to match the ABI `torch` was compiled against. Adjust these caps if your
+environment supports newer versions.
+
+Chroma also requires sqlite3 >=3.35.0, which this environment's system
+Python doesn't ship. If you hit a `RuntimeError` about sqlite3 on `poetry run
+python rag/store.py`, upgrade Homebrew's sqlite (`brew upgrade sqlite`) and
+rebuild `pysqlite3` against it:
+
+```bash
+sqlite_prefix=$(brew --prefix sqlite)
+CPPFLAGS="-I$sqlite_prefix/include" LDFLAGS="-L$sqlite_prefix/lib" \
+  PKG_CONFIG_PATH="$sqlite_prefix/lib/pkgconfig" poetry add pysqlite3
+```
+
+`rag/store.py` swaps in `pysqlite3` in place of the stdlib `sqlite3` before
+importing `chromadb`, so no further code changes are needed once it builds.
 
 ```bash
 poetry install
 poetry run python rag/chunk.py
 poetry run python rag/embed.py
+poetry run python rag/store.py
 ```

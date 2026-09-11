@@ -11,6 +11,9 @@ python = "^3.9"
 torch = "<2.3"
 sentence-transformers = "<3.0"
 numpy = "<2"
+onnxruntime = "<1.19"
+chromadb = "^1.5.9"
+pysqlite3 = "^0.6.0"
 
 [build-system]
 requires = ["poetry-core"]

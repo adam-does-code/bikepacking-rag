@@ -3,6 +3,7 @@
 bikepacking-101/
 rag/chunks.json
 rag/embeddings.json
+rag/chroma_db/
 
 # Python
 __pycache__/
