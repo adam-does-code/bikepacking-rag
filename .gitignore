@@ -2,6 +2,7 @@
 # per their Terms of Use (no crawl/scrape/harvest of site content).
 bikepacking-101/
 rag/chunks.json
+rag/embeddings.json
 
 # Python
 __pycache__/
