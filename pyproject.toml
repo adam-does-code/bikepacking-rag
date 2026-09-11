@@ -20,3 +20,11 @@ google-generativeai = "^0.8.6"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pylint.main]
+# CI runs pylint without installing the heavy ML dependency stack
+# (torch, chromadb, etc.), so it can't resolve these third-party imports.
+disable = [
+    "import-error",
+    "missing-function-docstring",  # module-level docstrings cover intent here
+]

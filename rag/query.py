@@ -7,19 +7,21 @@ retrieved context. Sources are built deterministically from chunk metadata
 rather than trusted to the model, so citations can't be hallucinated.
 """
 
+import os
 import sys
+from pathlib import Path
 
 import pysqlite3
 
+# Chroma requires sqlite3 >=3.35.0; this swaps in pysqlite3 (built against a
+# newer libsqlite3) before chromadb is imported. See README for the
+# environment-specific setup this depends on.
 sys.modules["sqlite3"] = pysqlite3
 
-import os
-from pathlib import Path
-
-import chromadb
-import google.generativeai as genai
-from dotenv import load_dotenv
-from sentence_transformers import SentenceTransformer
+import chromadb  # pylint: disable=wrong-import-position
+import google.generativeai as genai  # pylint: disable=wrong-import-position
+from dotenv import load_dotenv  # pylint: disable=wrong-import-position
+from sentence_transformers import SentenceTransformer  # pylint: disable=wrong-import-position
 
 load_dotenv()
 
